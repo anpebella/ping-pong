@@ -11,8 +11,13 @@
 - ✅ Події зіткнення (для звуків)
 - ✅ Звуки при зіткненні, перемозі та програші
 - ✅ Задній фон гри
+  <img width="1003" height="786" alt="Знімок екрана 2025-08-29 214605" src="https://github.com/user-attachments/assets/165d3cb8-8cd9-47f5-bcbe-ba550d6216f6" />
 - ✅ Зміна фону при перемозі чи програші
+  <img width="964" height="786" alt="Знімок екрана 2025-08-29 214700" src="https://github.com/user-attachments/assets/8bde82e2-4c66-4ac2-9e37-ddc8978ad639" />
+  <img width="937" height="759" alt="Знімок екрана 2025-08-29 214707" src="https://github.com/user-attachments/assets/24dc0218-9642-46f2-9eaf-81b5d8f7f2bc" />
+
 - ✅ Менюшка для вибору кольору лопаток
+  
 
 ## Як запустити проєкт
 
@@ -46,6 +51,7 @@
 ### Клієнт (`client.py`)
 - Підключається до сервера
 - Обирає колір лопаток для гри
+  <img width="1045" height="643" alt="Знімок екрана 2025-08-29 214431" src="https://github.com/user-attachments/assets/9ddd5374-d25c-44f4-ae43-31a3eebc15ab" />
 - Відображає гру, платформи, м’яч, рахунок
 - Відправляє натискання клавіш (`W` / `S`) на сервер
 
