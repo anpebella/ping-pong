@@ -1,33 +1,15 @@
-from pygame import *
-import socket
-import json
-from threading import Thread
+er_info", "data": player_info}
+    client.sendall((json.dumps(msg) + "\n").encode())
 
-# ---ПУГАМЕ НАЛАШТУВАННЯ ---
-WIDTH, HEIGHT = 800, 600
-init()
-screen = display.set_mode((WIDTH, HEIGHT))
-clock = time.Clock()
-display.set_caption("Пінг-Понг")
-# ---СЕРВЕР ---
-def connect_to_server():
-    while True:
-        try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client.connect(('localhost', 8080)) # ---- Підключення до сервера
-            buffer = ""
-            game_state = {}
-            my_id = int(client.recv(24).decode())
-            return my_id, game_state, buffer, client
-        except:
-            pass
-
+    return my_id
 
 def receive():
     global buffer, game_state, game_over
     while not game_over:
         try:
             data = client.recv(1024).decode()
+            if not data:
+                break
             buffer += data
             while "\n" in buffer:
                 packet, buffer = buffer.split("\n", 1)
@@ -37,19 +19,27 @@ def receive():
             game_state["winner"] = -1
             break
 
-# --- ШРИФТИ ---
+# --- Шрифти ---
 font_win = font.Font(None, 72)
 font_main = font.Font(None, 36)
-# --- ЗОБРАЖЕННЯ ----
+font_write = font.Font(None, 20)
 
-# --- ЗВУКИ ---
+# --- Картинки та звуки ---
+bg = transform.scale(image.load('images/bg_pin.jpg'), (WIDTH, HEIGHT))
+win_img = transform.scale(image.load('images/13588.jpg'), (WIDTH, HEIGHT))
+lose_img = transform.scale(image.load('images/game-lose.jpg'), (WIDTH, HEIGHT))
+wall_collide = mixer.Sound('images/click-menu-app-147357.mp3')
+plat_collide = mixer.Sound('images/click-game-menu-147356.mp3')
+win_sound = mixer.Sound('images/new-level-142995.mp3')
+lose_sound = mixer.Sound('images/error-08-206492.mp3')
 
-# --- ГРА ---
-game_over = False
-winner = None
-you_winner = None
-my_id, game_state, buffer, client = connect_to_server()
+# --- Запускаємо ---
+my_id = connect_to_server()
 Thread(target=receive, daemon=True).start()
+
+default_color = (255, 0, 255)
+play = play1 = 0
+
 while True:
     for e in event.get():
         if e.type == QUIT:
@@ -57,61 +47,89 @@ while True:
 
     if "countdown" in game_state and game_state["countdown"] > 0:
         screen.fill((0, 0, 0))
-        countdown_text = font.Font(None, 72).render(str(game_state["countdown"]), True, (255, 255, 255))
+        countdown_text = font.Font(None, 72).render(
+            str(game_state["countdown"]), True, (255, 255, 255)
+        )
         screen.blit(countdown_text, (WIDTH // 2 - 20, HEIGHT // 2 - 30))
         display.update()
-        continue  # Не малюємо гру до завершення відліку
+        continue
 
     if "winner" in game_state and game_state["winner"] is not None:
-        screen.fill((20, 20, 20))
+        screen.blit(win_img, (0, 0))
 
-        if you_winner is None:  # Встановлюємо тільки один раз
-            if game_state["winner"] == my_id:
-                you_winner = True
-            else:
-                you_winner = False
+        if you_winner is None:
+            you_winner = (game_state["winner"] == my_id)
 
         if you_winner:
             text = "Ти переміг!"
+            if play == 0:
+                win_sound.play()
+                play += 1
         else:
             text = "Пощастить наступним разом!"
+            screen.blit(lose_img, (0, 0))
+            if play1 == 0:
+                lose_sound.play()
+                play1 += 1
 
-        win_text = font_win.render(text, True, (255, 215, 0))
-        text_rect = win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        screen.blit(win_text, text_rect)
+        win_text = font_win.render(text, True, (0, 0, 0))
+        screen.blit(win_text, win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
 
-        text = font_win.render('К - рестарт', True, (255, 215, 0))
-        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 120))
-        screen.blit(text, text_rect)
+        restart_text = font_win.render('К - рестарт', True, (255, 215, 0))
+        screen.blit(restart_text, restart_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 120)))
 
         display.update()
-        continue  # Блокує гру після перемоги
+        continue
 
     if game_state:
-        screen.fill((30, 30, 30))
-        draw.rect(screen, (0, 255, 0), (20, game_state['paddles']['0'], 20, 100))
-        draw.rect(screen, (255, 0, 255), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
-        draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
-        score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
-        screen.blit(score_text, (WIDTH // 2 -25, 20))
+        screen.blit(bg, (0, 0))
+        players = game_state.get("players", {})
 
-        if game_state['sound_event']:
-            if game_state['sound_event'] == 'wall_hit':
-                # звук відбиття м'ячика від стін
-                pass
-            if game_state['sound_event'] == 'platform_hit':
-                # звук відбиття м'ячика від платформи
-                pass
+        # Ліва платформа
+        color1 = tuple(players.get("0", {}).get("color", default_color))
+        name1 = players.get("0", {}).get("name", "Player 1")
+        draw.rect(screen, color1, (20, game_state['paddles']['0'], 20, 100))
+        screen.blit(font_write.render(name1, True, (255, 255, 255)), (20, game_state['paddles']['0'] - 20))
+
+        # Права платформа
+        color2 = tuple(players.get("1", {}).get("color", default_color))
+        name2 = players.get("1", {}).get("name", "Player 2")
+        draw.rect(screen, color2, (WIDTH - 40, game_state['paddles']['1'], 20, 100))
+        screen.blit(font_write.render(name2, True, (255, 255, 255)), (WIDTH - 100, game_state['paddles']['1'] - 20))
+
+        # М'яч
+        draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
+
+        # Рахунок
+        score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
+        screen.blit(score_text, (WIDTH // 2 - 25, 20))
+
+        if game_state['sound_event'] == 'wall_hit':
+            wall_collide.play()
+        elif game_state['sound_event'] == 'platform_hit':
+            plat_collide.play()
 
     else:
-        wating_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
-        screen.blit(wating_text, (WIDTH // 2 - 25, 20))
+        waiting_text = font_main.render("Очікування гравців...", True, (255, 255, 255))
+        screen.blit(waiting_text, (WIDTH // 2 - 100, HEIGHT // 2))
 
     display.update()
     clock.tick(60)
 
+    # --- Керування ---
     keys = key.get_pressed()
     if keys[K_w]:
-        client.send(b"UP")
+        client.sendall((json.dumps("UP") + "\n").encode())
     elif keys[K_s]:
-        client.send(b"DOWN")
+        client.sendall((json.dumps("DOWN") + "\n").encode())
+
+    if game_state and ("winner" in game_state and game_state["winner"] is not None):
+        if keys[K_k]:
+            game_over = True
+            try:
+                client.close()
+            except:
+                pass
+            winner = None
+            you_winner = None
+            game_over = False
