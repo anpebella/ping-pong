@@ -18,6 +18,7 @@ class GameServer:
 
         self.clients = {0: None, 1: None}
         self.connected = {0: False, 1: False}
+        self.players = {0: {}, 1: {}}   # тут зберігаються {"name":..., "color":[...]}
         self.lock = threading.Lock()
         self.reset_game_state()
         self.sound_event = None
@@ -37,20 +38,38 @@ class GameServer:
 
     def handle_client(self, pid):
         conn = self.clients[pid]
-        try:
-            while True:
-                data = conn.recv(64).decode()
+        buffer = ""
+        while not self.game_over:
+            try:
+                data = conn.recv(1024).decode()
+                if not data:
+                    break
+                buffer += data
+                while "\n" in buffer:
+                    packet, buffer = buffer.split("\n", 1)
+                    if not packet.strip():
+                        continue
+                    try:
+                        message = json.loads(packet)
+                    except:
+                        continue
+
+                    if isinstance(message, str):
+                        if message == "UP":
+                            self.paddles[pid] = max(60, self.paddles[pid] - PADDLE_SPEED)
+                        elif message == "DOWN":
+                            self.paddles[pid] = min(HEIGHT - 100, self.paddles[pid] + PADDLE_SPEED)
+
+                    elif isinstance(message, dict) and message.get("type") == "player_info":
+                        self.players[pid] = message["data"]
+                        print(f"Гравець {pid}: {self.players[pid]}")
+
+            except:
                 with self.lock:
-                    if data == "UP":
-                        self.paddles[pid] = max(60, self.paddles[pid] - PADDLE_SPEED)
-                    elif data == "DOWN":
-                        self.paddles[pid] = min(HEIGHT - 100, self.paddles[pid] + PADDLE_SPEED)
-        except:
-            with self.lock:
-                self.connected[pid] = False
-                self.game_over = True
-                self.winner = 1 - pid  # інший гравець автоматично виграє
-                print(f"Гравець {pid} відключився. Переміг гравець {1 - pid}.")
+                    self.connected[pid] = False
+                    self.game_over = True
+                    self.winner = 1 - pid
+                break
 
     def broadcast_state(self):
         state = json.dumps({
@@ -59,7 +78,8 @@ class GameServer:
             "scores": self.scores,
             "countdown": max(self.countdown, 0),
             "winner": self.winner if self.game_over else None,
-            "sound_event": self.sound_event
+            "sound_event": self.sound_event,
+            "players": self.players
         }) + "\n"
         for pid, conn in self.clients.items():
             if conn:
@@ -80,15 +100,18 @@ class GameServer:
                 self.ball['x'] += self.ball['vx']
                 self.ball['y'] += self.ball['vy']
 
-                if self.ball['y'] <= 60 or self.ball['y'] >= HEIGHT:
+                # Відбивання від стелі/підлоги
+                if self.ball['y'] <= 60 or self.ball['y'] >= HEIGHT - 10:
                     self.ball['vy'] *= -1
                     self.sound_event = "wall_hit"
 
+                # Відбивання від лопаток
                 if (self.ball['x'] <= 40 and self.paddles[0] <= self.ball['y'] <= self.paddles[0] + 100) or \
                    (self.ball['x'] >= WIDTH - 40 and self.paddles[1] <= self.ball['y'] <= self.paddles[1] + 100):
                     self.ball['vx'] *= -1
-                    self.sound_event = 'platform_hit'
+                    self.sound_event = "platform_hit"
 
+                # Голи
                 if self.ball['x'] < 0:
                     self.scores[1] += 1
                     self.reset_ball()
@@ -96,6 +119,7 @@ class GameServer:
                     self.scores[0] += 1
                     self.reset_ball()
 
+                # Перевірка перемоги
                 if self.scores[0] >= 10:
                     self.game_over = True
                     self.winner = 0
@@ -137,7 +161,6 @@ class GameServer:
             print(f"Гравець {self.winner} переміг!")
             time.sleep(5)
 
-            # Закриваємо старі з'єднання
             for pid in [0, 1]:
                 try:
                     self.clients[pid].close()
