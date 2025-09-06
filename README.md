@@ -16,7 +16,7 @@
   <img width="964" height="786" alt="Знімок екрана 2025-08-29 214700" src="https://github.com/user-attachments/assets/8bde82e2-4c66-4ac2-9e37-ddc8978ad639" />
   <img width="937" height="759" alt="Знімок екрана 2025-08-29 214707" src="https://github.com/user-attachments/assets/24dc0218-9642-46f2-9eaf-81b5d8f7f2bc" />
 
-- ✅ Менюшка для вибору кольору лопаток
+- ✅ Менюшка до гри
   
 
 ## Як запустити проєкт
@@ -50,7 +50,7 @@
 
 ### Клієнт (`client.py`)
 - Підключається до сервера
-- Обирає колір лопаток для гри
+- В
   <img width="1045" height="643" alt="Знімок екрана 2025-08-29 214431" src="https://github.com/user-attachments/assets/9ddd5374-d25c-44f4-ae43-31a3eebc15ab" />
 - Відображає гру, платформи, м’яч, рахунок
 - Відправляє натискання клавіш (`W` / `S`) на сервер
