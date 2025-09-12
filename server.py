@@ -10,15 +10,15 @@ PADDLE_SPEED = 10
 COUNTDOWN_START = 3
 
 class GameServer:
-    def __init__(self, host='localhost', port=8080):
+    def __init__(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind((host, port))
+        self.server.bind(('localhost',9090))
         self.server.listen(2)
         print("🎮 Server started")
 
         self.clients = {0: None, 1: None}
         self.connected = {0: False, 1: False}
-        self.players = {0: {}, 1: {}}   # тут зберігаються {"name":..., "color":[...]}
+        self.players = {0: {}, 1: {}}
         self.lock = threading.Lock()
         self.reset_game_state()
         self.sound_event = None
