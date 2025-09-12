@@ -14,12 +14,12 @@
   <img width="795" height="629" alt="image" src="https://github.com/user-attachments/assets/df882415-7723-4d81-ac67-f19523d121da" />
 
 - ✅ Зміна фону при перемозі чи програші
-  <img width="964" height="786" alt="Знімок екрана 2025-08-29 214700" src="https://github.com/user-attachments/assets/8bde82e2-4c66-4ac2-9e37-ddc8978ad639" />
-  <img width="937" height="759" alt="Знімок екрана 2025-08-29 214707" src="https://github.com/user-attachments/assets/24dc0218-9642-46f2-9eaf-81b5d8f7f2bc" />
+<img width="791" height="635" alt="Знімок екрана 2025-09-12 155900" src="https://github.com/user-attachments/assets/0e7d8447-cead-4a2f-9fcf-98a48f634b78" />
+<img width="797" height="630" alt="Знімок екрана 2025-09-12 155910" src="https://github.com/user-attachments/assets/d655ee0c-a3bb-4e2b-9891-f76399c56f31" />
 
 - ✅ Менюшка до гри
   <img width="807" height="717" alt="Знімок екрана 2025-09-06 181307" src="https://github.com/user-attachments/assets/ee678d41-c703-4098-925b-00ba22118aae" />
-
+- ✅ Рахунок кожного користувача
 ## Як запустити проєкт
 
 1. **Завантаж проєкт**
@@ -46,6 +46,7 @@
 
 ### Сервер (`server.py`)
 - Очікує **двох гравців**
+- Очікує введені ім'я та колір
 - Веде гру: рухає м’яч, перевіряє зіткнення, надсилає **стан гри**
 - Приймає команди `UP`, `DOWN` від гравців
 
