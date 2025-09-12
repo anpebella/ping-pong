@@ -11,14 +11,15 @@
 - ✅ Події зіткнення (для звуків)
 - ✅ Звуки при зіткненні, перемозі та програші
 - ✅ Задній фон гри
-  <img width="795" height="629" alt="image" src="https://github.com/user-attachments/assets/df882415-7723-4d81-ac67-f19523d121da" />
+<img width="795" height="629" alt="image" src="https://github.com/user-attachments/assets/df882415-7723-4d81-ac67-f19523d121da" />
 
 - ✅ Зміна фону при перемозі чи програші
 <img width="791" height="635" alt="Знімок екрана 2025-09-12 155900" src="https://github.com/user-attachments/assets/0e7d8447-cead-4a2f-9fcf-98a48f634b78" />
 <img width="797" height="630" alt="Знімок екрана 2025-09-12 155910" src="https://github.com/user-attachments/assets/d655ee0c-a3bb-4e2b-9891-f76399c56f31" />
 
 - ✅ Менюшка до гри
-  <img width="807" height="717" alt="Знімок екрана 2025-09-06 181307" src="https://github.com/user-attachments/assets/ee678d41-c703-4098-925b-00ba22118aae" />
+<img width="807" height="717" alt="Знімок екрана 2025-09-06 181307" src="https://github.com/user-attachments/assets/ee678d41-c703-4098-925b-00ba22118aae" />
+  
 - ✅ Рахунок кожного користувача
 ## Як запустити проєкт
 
