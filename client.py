@@ -1,4 +1,45 @@
-er_info", "data": player_info}
+from pygame import *
+import socket
+import json
+from threading import Thread
+from Menu_for_pin import Menu
+
+menu = Menu()
+menu.mainloop()
+
+name = menu.name or "Player"
+host = str(menu.host).strip() or "localhost"
+try:
+    port = int(menu.port)
+except:
+    print("❌ Порт введений неправильно")
+    exit()
+chosen_color = menu.color if menu.color else (255, 0, 255)
+
+WIDTH, HEIGHT = 800, 600
+init()
+screen = display.set_mode((WIDTH, HEIGHT))
+clock = time.Clock()
+display.set_caption("Пінг-Понг")
+
+buffer = ""
+game_state = {}
+game_over = False
+winner = None
+you_winner = None
+
+# --- Підключення ---
+def connect_to_server():
+    global buffer, game_state, client
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("Host:", repr(host))
+    print("Port:", repr(port))
+    client.connect((host, port))
+
+    my_id = int(client.recv(16).decode().strip())
+
+    player_info = {"name": name, "color": chosen_color}
+    msg = {"type": "player_info", "data": player_info}
     client.sendall((json.dumps(msg) + "\n").encode())
 
     return my_id
@@ -72,7 +113,7 @@ while True:
                 lose_sound.play()
                 play1 += 1
 
-        win_text = font_win.render(text, True, (0, 0, 0))
+        win_text = font_win.render(text, True, (255,200,89))
         screen.blit(win_text, win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
 
         restart_text = font_win.render('К - рестарт', True, (255, 215, 0))
@@ -95,15 +136,15 @@ while True:
         color2 = tuple(players.get("1", {}).get("color", default_color))
         name2 = players.get("1", {}).get("name", "Player 2")
         draw.rect(screen, color2, (WIDTH - 40, game_state['paddles']['1'], 20, 100))
-        screen.blit(font_write.render(name2, True, (255, 255, 255)), (WIDTH - 100, game_state['paddles']['1'] - 20))
+        screen.blit(font_write.render(name2, True, (255, 255, 255)), (WIDTH - 70, game_state['paddles']['1'] - 20))
 
         # М'яч
         draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
 
-        # Рахунок
         score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
-        screen.blit(score_text, (WIDTH // 2 - 25, 20))
-
+        screen.blit(score_text, (WIDTH // 2 - 25, 40))
+        screen.blit(font_write.render(name1, True, (255, 255, 255)), (WIDTH // 2 +30, 20))
+        screen.blit(font_write.render(name2, True, (255, 255, 255)), (WIDTH // 2 -100,20))
         if game_state['sound_event'] == 'wall_hit':
             wall_collide.play()
         elif game_state['sound_event'] == 'platform_hit':
